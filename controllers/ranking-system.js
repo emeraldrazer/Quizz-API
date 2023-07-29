@@ -14,14 +14,14 @@ const leaderBoard = async function (req, res) {
     return res.status(200).json({ err: false, data: allPlayers });
 }
 
-const userInfo = async function(req, res){
+const userInfo = async function (req, res) {
     const user = req.params.user;
 
-    const aboutUser = await User.findOne({username: user})
-    .select('-_id -email -email_verified -password -gender -date_of_birth')
-    .exec();
+    const aboutUser = await User.findOne({ username: user })
+        .select('-_id -email -email_verified -password -gender -date_of_birth')
+        .exec();
 
-    if(!aboutUser){
+    if (!aboutUser) {
         return res.status(400).json({ err: true, data: null });
     }
 
@@ -46,7 +46,7 @@ const configuration = async function (req, res) {
     let decodedUser = req.user.signed;
 
     const current = await User.findOne({ _id: decodedUser })
-        .select('game_level game_points statistics')
+        .select('game_level game_xp statistics')
         .exec();
 
     if (!current) {
@@ -69,11 +69,11 @@ const configuration = async function (req, res) {
     let percentage = 0;
 
 
-    if(current.statistics.percentage == 0){
+    if (current.statistics.percentage == 0) {
         percentage = ((data.correct_answers / totalInCategory) * 100).toFixed(2);
     }
-    else{
-        percentage = ((numberOfCorrect / overall)* 100).toFixed(2);
+    else {
+        percentage = ((numberOfCorrect / overall) * 100).toFixed(2);
     }
 
     const filter = {
@@ -82,12 +82,12 @@ const configuration = async function (req, res) {
 
     const setValue = {
         $set: {
-            game_level: data.game_level,
-            'statistics.percentage': percentage, 
+            game_level: await updateLVL(current.game_xp + data.game_xp),
+            'statistics.percentage': percentage,
             'statistics.categories.$[categoryElem].percentage': ((data.correct_answers / totalInCategory) * 100).toFixed(2)
         },
         $inc: {
-            game_points: data.game_points,
+            game_xp: data.game_xp,
             'statistics.correct_answers': data.correct_answers,
             'statistics.incorrect_answers': data.incorrect_answers,
             'statistics.overall': data.correct_answers + data.incorrect_answers,
@@ -109,6 +109,26 @@ const configuration = async function (req, res) {
 
     return res.status(200).json({ err: false, result: update })
 
+}
+
+const updateLVL = async function (game_xp) {
+    const xpThresholds = {
+        450: 1,
+        1100: 2,
+        2025: 3,
+        3250: 4,
+        4900: 5,
+        6850: 6,
+        9100: 7,
+    };
+
+    for (const xpThreshold in xpThresholds) {
+        if (game_xp < xpThreshold) {
+            return xpThresholds[xpThreshold];
+        }
+    }
+
+    return 8; // If game_xp is greater than 9100
 }
 
 module.exports = { leaderBoard, userInfo, request, configuration };

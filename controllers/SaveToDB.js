@@ -81,9 +81,9 @@ const TaskSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Please specify game level']
     },
-    game_points: {
+    game_xp: {
         type: Number,
-        required: [true, 'Please specify game points']
+        required: [true, 'Please specify game xp']
     }
 })
 

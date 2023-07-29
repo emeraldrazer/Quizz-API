@@ -35,7 +35,7 @@ const register = async function (req, res) {
         date_of_birth: data.date_of_birth,
         avatar_id: "/static/media/022.341d7154eb9d42cff59c.jpg",
         game_level: 1,
-        game_points: 0
+        game_xp: 0
     };
 
     try{
