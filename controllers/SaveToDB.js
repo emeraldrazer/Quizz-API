@@ -74,6 +74,10 @@ const TaskSchema = new mongoose.Schema({
             }
         }]
     },
+    badges:[{
+            type: Number
+        }
+    ],
     overall: {
         type: Number
     },

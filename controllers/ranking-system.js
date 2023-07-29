@@ -68,7 +68,6 @@ const configuration = async function (req, res) {
 
     let percentage = 0;
 
-
     if (current.statistics.percentage == 0) {
         percentage = ((data.correct_answers / totalInCategory) * 100).toFixed(2);
     }
@@ -80,7 +79,7 @@ const configuration = async function (req, res) {
         _id: decodedUser,
     };
 
-    const setValue = {
+    let setValue = {
         $set: {
             game_level: await updateLVL(current.game_xp + data.game_xp),
             'statistics.percentage': percentage,
@@ -96,11 +95,14 @@ const configuration = async function (req, res) {
             'statistics.categories.$[categoryElem].total': data.correct_answers + data.incorrect_answers,
         },
     }
-
+    
     const options = {
         arrayFilters: [{ "categoryElem.category": data.category }],
     };
 
+    if(data.badge_id){
+        setValue = {...setValue, ...{$push: {badges: data.badge_id} }}
+    }
     const update = await User.updateOne(filter, setValue, options)
 
     if (!update) {
